@@ -1,27 +1,21 @@
 <template>
 	<main class="weather">
 		<div class="weather__today">
-			<div class="today__header">
-				<h1 class="header__city">OSLO</h1>
+			<h1 class="today__title">OSLO {{ temp }}</h1>
 
-				<h1>{{ temp }}</h1>
-			</div>
+			<p>Description: {{ text }}</p>
 
-			<div class="today__description">
-				<h4 class="description__text">Description: {{ text }}</h4>
-
-				<h4>Wind: {{ breeze }}</h4>
-			</div>
+			<p>Wind: {{ breeze }}</p>
 		</div>
 
 		<div class="weather__days">
-			<div class="days__box" v-for="day in days">
-				<h5 class="box__text">Day {{ day.day }}</h5>
+			<article class="days__box" v-for="day in days">
+				<h3 class="box__text">Day {{ day.day }}</h3>
 
-				<h5 class="box__text box__text--degree">{{ day.temperature }}</h5>
+				<p class="box__text--temperature">{{ day.temperature }}</p>
 				
-				<h5 class="box__text">{{ day.wind }}</h5>
-			</div>
+				<p class="box__text">{{ day.wind }}</p>
+			</article>
 		</div>
 	</main>
 </template>
@@ -43,92 +37,97 @@
 
 	 	methods: {
 	 		async fetchValue() {
-	 			const url = `https://goweather.herokuapp.com/weather/osl`;
+	 			const url = `https://goweather.herokuapp.com/weather/oslo`;
 	 			const respond = await fetch(url);
-				try {
-					await this.handleRespond(respond);
-				} catch (error) {
-					this.error = error.message;
-				}
-			},
+	 			const result = await respond.json();
 
-			async handleRespond(respond) {
-				if(respond.status >= 200 && respond.status < 300) {
-					const result  = await respond.json();
-					this.temp = result.temperature
-					this.breeze = result.wind
-					this.text = result.description
-					this.days = result.forecast
+                this.temp = result.temperature
+	 			this.breeze = result.wind
+	 			this.text = result.description
+	 			this.days = result.forecast
+	 		},
+
+	 	// methods: {
+	 	// 	async fetchValue() {
+	 	// 		const url = `https://goweather.herokuapp.com/weather/oslo`;
+	 	// 		const respond = await fetch(url);
+		// 		try {
+		// 			await this.handleRespond(respond);
+		// 		} catch (error) {
+		// 			this.error = error.message;
+		// 		}
+		// 	},
+
+		// 	async handleRespond(respond) {
+		// 		if(respond.status >= 200 && respond.status < 300) {
+		// 			const result  = await respond.json();
+		// 			this.temp = result.temperature
+		// 			this.breeze = result.wind
+		// 			this.text = result.description
+		// 			this.days = result.forecast
 				
-					return true;
+		// 			return true;
 					
-				} else {
-					if(respond.status === 404) {
-						throw new Error('Url ikke funnet!');
-					}
-					if(respond.status === 401) {
-						throw new Error('Ikke authorisert!');
-					}
-					if(respond.status > 500) {
-						throw new Error('Server error!');
-					}
-					throw new Error('noe gikk galt!');
-				}
-			}
+		// 		} else {
+		// 			if(respond.status === 404) {
+		// 				throw new Error('Url ikke funnet!');
+		// 			}
+		// 			if(respond.status === 401) {
+		// 				throw new Error('Ikke authorisert!');
+		// 			}
+		// 			if(respond.status > 500) {
+		// 				throw new Error('Server error!');
+		// 			}
+		// 			throw new Error('noe gikk galt!');
+		// 		}
+		// 	}
+		// }
 		}
 	}
 </script>
+
+<!-- Kommenterer script
+	1 Henter ut info fra api
+	2 Henter alle resultatene jeg trenger fra api
+	2.1 Gir resultatene nye navn, som this.temp -> result.temperature
+	3 EVT FEIL MELDINGER
+-->
 
 <style>
 	.weather {
 		display: flex;
 		flex-flow: column;
 		align-items: center;
+		padding-top: 100px;
 	}
 
-	.today__header {
-		padding-top: 30px;
-		font-size: 20px;
-		display: flex;
-		text-align: center;
-	}
-
-	@media screen and (min-width: 600px) {
-		.today__header {
-			display: flex;
-			padding-top: 100px;
-			font-size: 40px;
+	@media screen and (max-width: 650px) {
+		.weather {
+			padding-top: 40px;
 		}
 	}
 
-	.header__city {
-		padding-right: 100px;
+	.weather__today {
+		padding-bottom: 30px;
 	}
 
-	.today__description {
-		margin-bottom: 30px;
+	.today__title {
+		font-size: 60px;
 	}
 
-	@media screen and (min-width: 600px) {
-		.today__description {
-			display: flex;
-			margin-bottom: 50px;
+	@media screen and (max-width: 650px) {
+		.today__title {
+			font-size: 30px;
 		}
 	}
 
-	.description__text {
-		padding-right: 130px;
+	.weather__days {
+		display: flex
 	}
 
-	@media screen and (max-width: 600px) {
-		.description__text {
-			padding-right: 10px;
-		}
-	}
-
-	@media screen and (min-width: 650px) {
+	@media screen and (max-width: 650px) {
 		.weather__days {
-			display: flex;
+			display: inline;
 		}
 	}
 
@@ -138,15 +137,22 @@
 		margin: 5px;
 		padding-top: 10px;
 		text-align: center;
-		background-color: lightblue;
-		font-size: 30px;
+		background-color: var(--details);
+	}
+
+	@media screen and (max-width: 650px) {
+		.days__box {
+			width: 250px;
+		}
 	}
 
 	.box__text {
 		padding-top: 20px;
 	}
 
-	.box__text--degree {
-		font-size: 60px;
+	.box__text--temperature {
+		padding-top: 20px;
+		font-size: 50px;
+		font-weight: bold;
 	}
 </style>
