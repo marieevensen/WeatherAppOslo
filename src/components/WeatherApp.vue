@@ -1,5 +1,5 @@
 <template>
-	<main class="weather">
+	<main class="weather" v-if="!error">
 		<div class="weather__today">
 			<h1 class="today__title">OSLO {{ temp }}</h1>
 
@@ -18,6 +18,10 @@
 			</article>
 		</div>
 	</main>
+
+	<div v-if="error">
+		{{ error }}
+	</div>
 </template>
 
 <script>
@@ -27,7 +31,8 @@
 				temp: '',
 				breeze: '',
 				text: '',
-				days: []
+				days: [],
+				error: ''
 	 		}
 	 	},
 
@@ -39,58 +44,46 @@
 	 		async fetchValue() {
 	 			const url = `https://goweather.herokuapp.com/weather/oslo`;
 	 			const respond = await fetch(url);
-	 			const result = await respond.json();
+				try {
+					await this.handleRespond(respond);
+				} catch (error) {
+					this.error = error.message;
+				}
+			},
 
-                this.temp = result.temperature
-	 			this.breeze = result.wind
-	 			this.text = result.description
-	 			this.days = result.forecast
-	 		},
-
-	 	// methods: {
-	 	// 	async fetchValue() {
-	 	// 		const url = `https://goweather.herokuapp.com/weather/oslo`;
-	 	// 		const respond = await fetch(url);
-		// 		try {
-		// 			await this.handleRespond(respond);
-		// 		} catch (error) {
-		// 			this.error = error.message;
-		// 		}
-		// 	},
-
-		// 	async handleRespond(respond) {
-		// 		if(respond.status >= 200 && respond.status < 300) {
-		// 			const result  = await respond.json();
-		// 			this.temp = result.temperature
-		// 			this.breeze = result.wind
-		// 			this.text = result.description
-		// 			this.days = result.forecast
+			async handleRespond(respond) {
+				if(respond.status >= 200 && respond.status < 300) {
+					const result  = await respond.json();
+					this.temp = result.temperature
+					this.breeze = result.wind
+					this.text = result.description
+					this.days = result.forecast
 				
-		// 			return true;
+					return true;
 					
-		// 		} else {
-		// 			if(respond.status === 404) {
-		// 				throw new Error('Url ikke funnet!');
-		// 			}
-		// 			if(respond.status === 401) {
-		// 				throw new Error('Ikke authorisert!');
-		// 			}
-		// 			if(respond.status > 500) {
-		// 				throw new Error('Server error!');
-		// 			}
-		// 			throw new Error('noe gikk galt!');
-		// 		}
-		// 	}
-		// }
+				} else {
+					if(respond.status === 404) {
+						throw new Error('Url ikke funnet!');
+					}
+					if(respond.status === 401) {
+						throw new Error('Ikke authorisert!');
+					}
+					if(respond.status > 500) {
+						throw new Error('Server error!');
+					}
+					throw new Error('Noe gikk galt!');
+				}
+			}
 		}
 	}
 </script>
 
 <!-- Kommenterer script
 	1 Henter ut info fra api
-	2 Henter alle resultatene jeg trenger fra api
-	2.1 Gir resultatene nye navn, som this.temp -> result.temperature
-	3 EVT FEIL MELDINGER
+	2 Sjekker om status er større eller lik 200 OG mindre enn 300
+	2.1 Hvis status er det så hentes alle resultatene jeg trenger fra api
+	2.2 Gir resultatene nye navn, som this.temp = result.temperature
+	3 Hvis ikke 2 er true, så sjekkes det hvilken feilmelding som gjelder og skriver ut en errormelding
 -->
 
 <style>
