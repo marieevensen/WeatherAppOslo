@@ -8,3 +8,5 @@ The project gives you:
 - The degree in the city.
 - A description of the weather and how strong the wind is.
 - You can also see this information for the next three days too.
+
+This project is very useful if you want to retrieve data from an API.
